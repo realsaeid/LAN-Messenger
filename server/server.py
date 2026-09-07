@@ -126,5 +126,5 @@ def start_server():
         )
 
 
-if name == "__main__":
+if __name__ == "__main__":
     start_server()

@@ -13,10 +13,12 @@ from PySide6.QtWidgets import (
 
 class MainWindow(QMainWindow):
 
-    def __init__(self, username):
+    def __init__(self, username, client):
+
         super().__init__()
 
         self.username = username
+        self.client = client
 
         self.setWindowTitle(
             f"LAN Messenger - {username}"
@@ -26,38 +28,53 @@ class MainWindow(QMainWindow):
 
         self.create_ui()
 
+        self.client.on_users_updated = (
+            self.update_users
+        )
+
     def create_ui(self):
 
         central_widget = QWidget()
 
-        self.setCentralWidget(central_widget)
+        self.setCentralWidget(
+            central_widget
+        )
 
         main_layout = QHBoxLayout(
             central_widget
         )
 
-        # -------------------------
+        # --------------------
         # Users
-        # -------------------------
+        # --------------------
 
         users_layout = QVBoxLayout()
 
-        users_label = QLabel("Users")
+        users_label = QLabel(
+            "Online Users"
+        )
 
         self.users_list = QListWidget()
 
-        users_layout.addWidget(users_label)
-        users_layout.addWidget(self.users_list)
+        users_layout.addWidget(
+            users_label
+        )
 
-        # -------------------------
+        users_layout.addWidget(
+            self.users_list
+        )
+
+        # --------------------
         # Chat
-        # -------------------------
+        # --------------------
 
         chat_layout = QVBoxLayout()
 
         self.chat_area = QTextEdit()
 
-        self.chat_area.setReadOnly(True)
+        self.chat_area.setReadOnly(
+            True
+        )
 
         self.message_input = QLineEdit()
 
@@ -65,7 +82,9 @@ class MainWindow(QMainWindow):
             "Type your message..."
         )
 
-        self.send_button = QPushButton("Send")
+        self.send_button = QPushButton(
+            "Send"
+        )
 
         input_layout = QHBoxLayout()
 
@@ -85,9 +104,9 @@ class MainWindow(QMainWindow):
             input_layout
         )
 
-        # -------------------------
-        # Main layout
-        # -------------------------
+        # --------------------
+        # Main Layout
+        # --------------------
 
         main_layout.addLayout(
             users_layout,
@@ -98,3 +117,23 @@ class MainWindow(QMainWindow):
             chat_layout,
             3
         )
+
+    def update_users(self, users):
+
+        self.users_list.clear()
+
+        for user in users:
+
+            if user == self.username:
+
+                continue
+
+            self.users_list.addItem(
+                f"🟢 {user}"
+            )
+
+    def closeEvent(self, event):
+
+        self.client.disconnect()
+
+        event.accept()
